@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#111312" />
+    <title>Rivals — Guía para jugar</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="reader">
+      <header class="topbar">
+        <div class="brand"><span class="brand-mark" aria-hidden="true">R</span> RIVALS</div>
+        <div class="top-note">Tu guía interactiva</div>
+      </header>
+
+      <main>
+        <div class="book-meta">
+          <div>
+            <p class="eyebrow">Roblox / Gaming</p>
+            <h1>Guía para jugar</h1>
+          </div>
+          <div class="page-counter" aria-live="polite">
+            <span class="counter-current" id="counter">01</span>
+            <span>/</span>
+            <span>02</span>
+          </div>
+        </div>
+
+        <section class="book-area" id="bookArea" data-state="cover" aria-label="Libro interactivo Rivals">
+          <button class="edge-control previous" id="edgePrevious" type="button" aria-label="Pasar a la página anterior" disabled>‹</button>
+          <div class="book" id="book">
+            <article class="page left-page" aria-label="Página 1: empieza aquí">
+              <div class="page-content">
+                <p class="inside-label">Antes de entrar a la arena</p>
+                <h2>Precisión antes que prisa.</h2>
+                <p>Rivals es un juego de duelos rápidos: dos jugadores se enfrentan y gana quien demuestra mejor puntería, movimiento y lectura del rival.</p>
+                <p>Al comenzar, elige un modo, prepara tu equipamiento y aprende cómo se comporta cada arma. No hace falta correr hacia el combate sin un plan.</p>
+                <div class="tip"><strong>Tu primer objetivo:</strong> conoce el mapa y localiza la cobertura antes de buscar el primer duelo.</div>
+              </div>
+              <span class="page-number">01</span>
+            </article>
+
+            <article class="page right-page" aria-label="Página 2: consejos para jugar">
+              <div class="page-content">
+                <p class="inside-label">En cada enfrentamiento</p>
+                <h2>Lee el duelo. Cambia el ritmo.</h2>
+                <p>Muévete de forma impredecible y aprovecha paredes y esquinas para protegerte mientras recargas. Saltar o asomarte siempre de la misma manera hace que sea más fácil anticiparte.</p>
+                <p>Apunta con calma, controla la distancia y no gastes toda tu munición de golpe. Si el rival cambia de estrategia, cambia la tuya: cada partida es una oportunidad para aprender.</p>
+                <div class="tip"><strong>Recuerda:</strong> práctica, reflejos y buenas decisiones valen más que precipitarse. Juega limpio y disfruta el duelo.</div>
+              </div>
+              <span class="page-number">02</span>
+            </article>
+
+            <div class="spine-shadow" aria-hidden="true"></div>
+
+            <div class="cover" id="cover" role="button" tabindex="0" aria-label="Abrir el libro">
+              <div class="cover-face cover-front">
+                <img src="./Captura%20de%20pantalla%202026-10-21%20a%20la(s)%207.48.25%E2%80%AFp.m..png" alt="Portada del libro Rivals: guía para jugar" />
+                <div class="turn-hint"><span aria-hidden="true">↶</span> Abrir libro</div>
+              </div>
+              <div class="cover-face cover-inside">
+                <div class="inside-cover-note">
+                  <span>Una guía rápida</span>
+                  <h2>Todo duelo empieza con una buena decisión.</h2>
+                  <p>Pasa la página y descubre cómo entrar a la arena con confianza.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="back-cover" id="backCover" role="button" tabindex="0" aria-label="Contraportada. Volver a la página anterior">
+              <img src="./Captura%20de%20pantalla%202026-10-21%20a%20la(s)%207.47.46%E2%80%AFp.m..png" alt="Contraportada Rivals: precisión, reflejos, rivales" />
+              <div class="turn-hint"><span aria-hidden="true">↶</span> Volver a leer</div>
+            </div>
+          </div>
+          <button class="edge-control next" id="edgeNext" type="button" aria-label="Pasar a la página siguiente">›</button>
+        </section>
+
+        <div class="reader-footer">
+          <div class="reading-status"><span class="status-dot" aria-hidden="true"></span><span id="statusText">Portada</span></div>
+          <nav class="controls" aria-label="Controles del libro">
+            <button class="control-button" id="previousButton" type="button" disabled>← Anterior</button>
+            <button class="control-button primary" id="nextButton" type="button">Leer guía <span aria-hidden="true">→</span></button>
+          </nav>
+        </div>
+        <p class="keyboard-hint">También puedes usar <kbd>←</kbd> <kbd>→</kbd> o deslizar para pasar de página</p>
+      </main>
+    </div>
+
+    <script src="./script.js" defer></script>
+  </body>
+</html>
