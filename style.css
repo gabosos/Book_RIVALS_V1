@@ -16,6 +16,7 @@
       body {
         min-width: 320px;
         min-height: 100vh;
+        overflow-x: clip;
         margin: 0;
         color: var(--ink);
         background:
@@ -307,30 +308,49 @@
         border-radius: 0 5px 5px 0;
         background: #121313;
         opacity: 0;
-        transform: rotateY(-180deg);
-        transform-origin: left center;
-        transition:
-          transform 850ms cubic-bezier(.2, .72, .18, 1),
-          opacity 0s 425ms;
-        backface-visibility: hidden;
+        visibility: hidden;
+        transition: opacity 180ms ease;
         cursor: pointer;
       }
 
       .back-cover.is-visible {
         z-index: 4;
         opacity: 1;
-        transform: rotateY(0);
-        transition:
-          transform 850ms cubic-bezier(.2, .72, .18, 1),
-          opacity 0s;
+        visibility: visible;
       }
 
-      .back-cover.is-flipping {
+      .page-turn {
+        position: absolute;
+        z-index: 5;
+        inset: 0 0 0 50%;
+        display: none;
+        transform: rotateY(0);
+        transform-origin: left center;
+        transform-style: preserve-3d;
+        pointer-events: none;
+      }
+
+      .page-turn.is-active {
+        display: block;
+        transition: transform 850ms cubic-bezier(.2, .72, .18, 1);
+      }
+
+      .page-turn.is-turning-forward {
         transform: rotateY(-180deg);
-        opacity: 0;
-        transition:
-          transform 850ms cubic-bezier(.2, .72, .18, 1),
-          opacity 0s 425ms;
+      }
+
+      .page-turn.is-turning-backward {
+        transform: rotateY(180deg);
+      }
+
+      .page-turn-face {
+        position: absolute;
+        inset: 0;
+        backface-visibility: hidden;
+      }
+
+      .page-turn-back {
+        transform: rotateY(180deg);
       }
 
       .spine-shadow {
@@ -344,17 +364,33 @@
         background: linear-gradient(90deg, #16151100, #25221825, #16151100);
       }
 
-      .book-area[data-state="cover"] .left-page,
-      .book-area[data-state="back"] .right-page {
+      .book-area[data-state="cover"] > .book > .page:not(.page-turn-face),
+      .book-area[data-state="back"] > .book > .page:not(.page-turn-face) {
         visibility: hidden;
       }
 
-      .book-area[data-state="back"] .left-page {
+      .book-area[data-state="inside-one"] .right-page {
         visibility: hidden;
       }
 
       .book-area[data-state="back"] .back-cover {
         visibility: visible;
+      }
+
+      .book-area[data-state="inside-one"] .left-page {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 50%;
+        width: 50%;
+        height: 100%;
+        border-radius: 0 5px 5px 0;
+        visibility: visible;
+      }
+
+      .book-area[data-state="inside-two"] .cover,
+      .book-area[data-state="back"] .cover {
+        visibility: hidden;
       }
 
       .turn-hint {
@@ -591,12 +627,23 @@
           visibility: visible;
         }
 
+        .book-area[data-state="inside-one"] .left-page {
+          right: 0;
+          left: 0;
+          width: 100%;
+          border-radius: 5px;
+        }
+
         .cover {
           inset: 0;
         }
 
         .cover.is-open {
           transform: rotateY(-180deg);
+        }
+
+        .book-area[data-state="inside-one"][data-settled="true"] .cover {
+          visibility: hidden;
         }
 
         .book-area[data-state="inside-two"] .cover,
@@ -607,6 +654,10 @@
         .back-cover {
           inset: 0;
           border-radius: 5px;
+        }
+
+        .page-turn {
+          inset: 0;
         }
 
         .page-content {
@@ -685,4 +736,3 @@
           transition-duration: .01ms !important;
         }
       }
-

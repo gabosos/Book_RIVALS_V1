@@ -1,143 +1,171 @@
-      (() => {
-        const bookArea = document.querySelector("#bookArea");
-        const cover = document.querySelector("#cover");
-        const backCover = document.querySelector("#backCover");
-        const counter = document.querySelector("#counter");
-        const statusText = document.querySelector("#statusText");
-        const previousButton = document.querySelector("#previousButton");
-        const nextButton = document.querySelector("#nextButton");
-        const edgePrevious = document.querySelector("#edgePrevious");
-        const edgeNext = document.querySelector("#edgeNext");
-        const pageElements = [...document.querySelectorAll(".page")];
-        const mobileReader = window.matchMedia("(max-width: 520px)");
-        let currentPage = 0;
-        let isTurning = false;
-        let touchStartX = null;
-        let turnTimer;
-        let wasMobile = mobileReader.matches;
+(() => {
+  const bookArea = document.querySelector("#bookArea");
+  const cover = document.querySelector("#cover");
+  const backCover = document.querySelector("#backCover");
+  const pageTurn = document.querySelector("#pageTurn");
+  const turnFront = pageTurn.querySelector(".page-turn-front");
+  const turnBack = pageTurn.querySelector(".page-turn-back");
+  const counter = document.querySelector("#counter");
+  const statusText = document.querySelector("#statusText");
+  const previousButton = document.querySelector("#previousButton");
+  const nextButton = document.querySelector("#nextButton");
+  const edgePrevious = document.querySelector("#edgePrevious");
+  const edgeNext = document.querySelector("#edgeNext");
+  const pageElements = [...document.querySelectorAll(".page:not(.page-turn-face)")];
+  const mobileReader = window.matchMedia("(max-width: 520px)");
+  const turnDuration = 850;
+  const states = ["cover", "inside-one", "inside-two", "back"];
+  const statusLabels = [
+    "Portada",
+    "Leyendo · Página 1 de 2",
+    "Leyendo · Página 2 de 2",
+    "Contraportada",
+  ];
+  let currentPage = 0;
+  let isTurning = false;
+  let touchStartX = null;
+  let turnTimer;
 
-        function render() {
-          const states = mobileReader.matches
-            ? ["cover", "inside-one", "inside-two", "back"]
-            : ["cover", "inside", "back"];
-          const state = states[currentPage];
-          const isBackCover = state === "back";
-          const pageCount = states.length;
-          bookArea.dataset.state = state;
-          cover.classList.toggle("is-open", currentPage > 0);
-          backCover.classList.toggle("is-visible", isBackCover);
-          pageElements.forEach((page, index) => {
-            const isVisiblePage = state === "inside"
-              || (state === "inside-one" && index === 0)
-              || (state === "inside-two" && index === 1);
-            page.inert = mobileReader.matches && !isVisiblePage;
-            page.setAttribute("aria-hidden", String(mobileReader.matches && !isVisiblePage));
-          });
-          const displayedPage = state === "inside-two" || isBackCover || state === "inside" ? 2 : 1;
-          counter.textContent = String(displayedPage).padStart(2, "0");
-          statusText.textContent = isBackCover
-            ? "Contraportada"
-            : state === "inside-one"
-              ? "Leyendo · Página 1 de 2"
-              : state === "inside-two"
-                ? "Leyendo · Página 2 de 2"
-                : state === "inside"
-                  ? "Leyendo · 2 páginas"
-                  : "Portada";
-          previousButton.disabled = currentPage === 0 || isTurning;
-          edgePrevious.disabled = currentPage === 0 || isTurning;
-          nextButton.disabled = currentPage === pageCount - 1 || isTurning;
-          edgeNext.disabled = currentPage === pageCount - 1 || isTurning;
-          nextButton.innerHTML = currentPage > 0
-            ? `${mobileReader.matches && currentPage === 1 ? "Página 2" : "Terminar"} <span aria-hidden="true">→</span>`
-            : 'Leer guía <span aria-hidden="true">→</span>';
-          nextButton.setAttribute(
-            "aria-label",
-            currentPage === pageCount - 1
-              ? "Ya estás en la contraportada"
-              : currentPage === 0
-                ? "Abrir el libro y leer la guía"
-                : mobileReader.matches && currentPage === 1
-                  ? "Pasar a la página 2"
-                  : "Ir a la contraportada"
-          );
-          cover.setAttribute("aria-label", currentPage === 0 ? "Abrir el libro" : "Volver a la portada");
-          backCover.setAttribute("aria-label", "Contraportada. Volver a la página anterior");
-        }
+  function render() {
+    const state = states[currentPage];
+    const isBackCover = state === "back";
+    const visiblePages = state === "inside-two"
+      ? pageElements
+      : state === "inside-one"
+        ? [pageElements[0]]
+        : [];
 
-        function turnTo(nextPage) {
-          const lastPage = mobileReader.matches ? 3 : 2;
-          if (isTurning || nextPage < 0 || nextPage > lastPage || nextPage === currentPage) return;
-          isTurning = true;
-          currentPage = nextPage;
-          render();
-          turnTimer = window.setTimeout(() => {
-            isTurning = false;
-            render();
-          }, 850);
-        }
+    bookArea.dataset.state = state;
+    bookArea.dataset.settled = String(!isTurning);
+    cover.classList.toggle("is-open", currentPage > 0);
+    backCover.classList.toggle("is-visible", isBackCover);
 
-        function next() {
-          turnTo(currentPage + 1);
-        }
+    pageElements.forEach((page) => {
+      const isVisible = visiblePages.includes(page);
+      page.inert = !isVisible;
+      page.setAttribute("aria-hidden", String(!isVisible));
+    });
 
-        function previous() {
-          if (currentPage > 0) turnTo(currentPage - 1);
-        }
+    counter.textContent = String(currentPage > 1 ? 2 : 1).padStart(2, "0");
+    statusText.textContent = statusLabels[currentPage];
+    previousButton.disabled = currentPage === 0 || isTurning;
+    edgePrevious.disabled = currentPage === 0 || isTurning;
+    nextButton.disabled = currentPage === states.length - 1 || isTurning;
+    edgeNext.disabled = currentPage === states.length - 1 || isTurning;
 
-        nextButton.addEventListener("click", next);
-        edgeNext.addEventListener("click", next);
-        previousButton.addEventListener("click", previous);
-        edgePrevious.addEventListener("click", previous);
+    const nextLabels = [
+      ["Leer página 1 →", "Abrir el libro y leer la página 1"],
+      ["Página 2 →", "Pasar a la página 2"],
+      ["Contraportada →", "Pasar a la contraportada"],
+      ["Fin del libro", "Estás en la última página"],
+    ];
+    nextButton.textContent = nextLabels[currentPage][0];
+    nextButton.setAttribute("aria-label", nextLabels[currentPage][1]);
+    cover.setAttribute("aria-label", currentPage === 0 ? "Abrir el libro" : "Volver a la página anterior");
+  }
 
-        cover.addEventListener("click", () => {
-          if (currentPage === 0) next();
-          else if (currentPage < (mobileReader.matches ? 3 : 2)) previous();
-        });
-        backCover.addEventListener("click", previous);
+  function clearPageTurn() {
+    window.clearTimeout(turnTimer);
+    pageTurn.classList.remove("is-active", "is-turning-forward", "is-turning-backward");
+    pageTurn.style.transition = "";
+    pageTurn.style.transform = "";
+  }
 
-        for (const element of [cover, backCover]) {
-          element.addEventListener("keydown", (event) => {
-            if (event.key === "Enter" || event.key === " ") {
-              event.preventDefault();
-              element.click();
-            }
-          });
-        }
+  function animatePageTurn(sourcePage, direction) {
+    const content = sourcePage.innerHTML;
+    turnFront.innerHTML = content;
+    turnBack.innerHTML = content;
+    pageTurn.classList.remove("is-turning-forward", "is-turning-backward");
+    pageTurn.style.transition = "none";
+    pageTurn.style.transform = "rotateY(0)";
+    pageTurn.classList.add("is-active");
+    pageTurn.getBoundingClientRect();
+    pageTurn.style.transition = "";
 
-        document.addEventListener("keydown", (event) => {
-          if (event.altKey || event.ctrlKey || event.metaKey) return;
-          if (event.key === "ArrowRight") {
-            event.preventDefault();
-            next();
-          } else if (event.key === "ArrowLeft") {
-            event.preventDefault();
-            previous();
-          }
-        });
+    window.requestAnimationFrame(() => {
+      pageTurn.classList.add(direction === "forward" ? "is-turning-forward" : "is-turning-backward");
+    });
+  }
 
-        bookArea.addEventListener("touchstart", (event) => {
-          touchStartX = event.changedTouches[0].clientX;
-        }, { passive: true });
+  function turnTo(nextPage) {
+    if (isTurning || nextPage < 0 || nextPage >= states.length || nextPage === currentPage) return;
 
-        bookArea.addEventListener("touchend", (event) => {
-          if (touchStartX === null) return;
-          const distance = event.changedTouches[0].clientX - touchStartX;
-          if (Math.abs(distance) > 45) distance < 0 ? next() : previous();
-          touchStartX = null;
-        }, { passive: true });
+    const previousPage = currentPage;
+    isTurning = true;
+    currentPage = nextPage;
+    render();
 
-        mobileReader.addEventListener("change", (event) => {
-          if (event.matches === wasMobile) return;
-          window.clearTimeout(turnTimer);
-          isTurning = false;
-          currentPage = event.matches
-            ? currentPage === 0 ? 0 : currentPage === 2 ? 3 : currentPage
-            : currentPage === 0 ? 0 : currentPage === 3 ? 2 : 1;
-          wasMobile = event.matches;
-          render();
-        });
+    if (nextPage === previousPage + 1 && previousPage === 1) {
+      animatePageTurn(pageElements[0], "forward");
+    } else if (nextPage === previousPage + 1 && previousPage === 2) {
+      animatePageTurn(pageElements[1], "forward");
+    } else if (nextPage === previousPage - 1 && previousPage === 2) {
+      animatePageTurn(pageElements[1], "backward");
+    }
 
-        render();
-      })();
+    turnTimer = window.setTimeout(() => {
+      clearPageTurn();
+      isTurning = false;
+      render();
+    }, turnDuration);
+  }
 
+  function next() {
+    turnTo(currentPage + 1);
+  }
+
+  function previous() {
+    turnTo(currentPage - 1);
+  }
+
+  nextButton.addEventListener("click", next);
+  edgeNext.addEventListener("click", next);
+  previousButton.addEventListener("click", previous);
+  edgePrevious.addEventListener("click", previous);
+
+  cover.addEventListener("click", () => {
+    if (currentPage === 0) next();
+    else if (currentPage < states.length - 1) previous();
+  });
+  backCover.addEventListener("click", previous);
+
+  for (const element of [cover, backCover]) {
+    element.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        element.click();
+      }
+    });
+  }
+
+  document.addEventListener("keydown", (event) => {
+    if (event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      next();
+    } else if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      previous();
+    }
+  });
+
+  bookArea.addEventListener("touchstart", (event) => {
+    touchStartX = event.changedTouches[0].clientX;
+  }, { passive: true });
+
+  bookArea.addEventListener("touchend", (event) => {
+    if (touchStartX === null) return;
+    const distance = event.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(distance) > 45) distance < 0 ? next() : previous();
+    touchStartX = null;
+  }, { passive: true });
+
+  mobileReader.addEventListener("change", () => {
+    if (!isTurning) return;
+    clearPageTurn();
+    isTurning = false;
+    render();
+  });
+
+  render();
+})();
